@@ -1,11 +1,19 @@
 from sqlalchemy.orm import Session
+
 from models.expense_claim import Expense_claim
 from models.budget_requests import Budget_requests
+from models.employees import Employee
+
 
 class BudgetRequestRepository:
 
+
     @staticmethod
-    def get_claim_by_id(claim_id, db: Session):
+    def get_claim_by_id(
+        claim_id,
+        db: Session
+    ):
+
         return (
             db.query(Expense_claim)
             .filter(
@@ -14,11 +22,14 @@ class BudgetRequestRepository:
             .first()
         )
 
+
+
     @staticmethod
     def get_budget_request_by_id(
         budget_request_id,
         db: Session
     ):
+
         return (
             db.query(Budget_requests)
             .filter(
@@ -27,28 +38,62 @@ class BudgetRequestRepository:
             .first()
         )
 
+
+
+    @staticmethod
+    def get_employee_by_id(
+        employee_id,
+        db: Session
+    ):
+
+        return (
+            db.query(Employee)
+            .filter(
+                Employee.id == employee_id
+            )
+            .first()
+        )
+
+
+
     @staticmethod
     def create(
         budget_request,
         db: Session
-    ):   
+    ):
+
         db.add(budget_request)
+
         db.commit()
-        db.refresh(budget_request)
+
+        db.refresh(
+            budget_request
+        )
+
         return budget_request
+
+
 
     @staticmethod
     def save(
         budget_request,
         db: Session
     ):
+
         db.commit()
-        db.refresh(budget_request)
+
+        db.refresh(
+            budget_request
+        )
+
         return budget_request
+
+
+
     @staticmethod
     def get_budget_requests(
         claim_id,
-        db
+        db: Session
     ):
 
         claim = (
@@ -59,7 +104,9 @@ class BudgetRequestRepository:
             .first()
         )
 
+
         if not claim:
             return None
+
 
         return claim.budget_requests
