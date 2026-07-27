@@ -101,3 +101,16 @@ class ExpenseLineItemService:
             "category":
             category.name
         }
+    @staticmethod
+    def get_expense_line_items(
+        claim_id,
+        db
+    ):
+
+        return (
+            ExpenseLineItemRepository
+            .get_expense_line_items(
+                claim_id,
+                db
+            )
+        )

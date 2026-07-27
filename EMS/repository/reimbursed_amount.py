@@ -50,3 +50,21 @@ class ReimbursementRepository:
         db.commit()
         db.refresh(reimbursement)
         return reimbursement
+    @staticmethod
+    def get_reimbursement(
+        claim_id,
+        db
+    ):
+
+        claim = (
+            db.query(Expense_claim)
+            .filter(
+                Expense_claim.id == claim_id
+            )
+            .first()
+        )
+
+        if not claim:
+            return None
+
+        return claim.reimbursement

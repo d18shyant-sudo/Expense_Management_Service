@@ -19,7 +19,7 @@ from schema.partial_reimbursement import (
 from service.partial_reimbursed_amount import (
     PartialReimbursementService
 )
-
+from auth import require_role
 router = APIRouter(
     prefix="/api/v1",
     tags=["Partial_Reimbursement"]
@@ -29,7 +29,7 @@ router = APIRouter(
 )
 def create_partial_reimbursement(
     payment: PartialReimbursementCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin"))
 ):
     try:
 
@@ -72,12 +72,12 @@ def create_partial_reimbursement(
             }
         )
 @router.put(
-    "/partial-reimbursements/{partial_id}"
+    "/partial-reimbursements"
 )
 def update_partial_reimbursement(
     partial_id: str,
     payment: PartialReimbursementUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin"))
 ):
     try:
 
@@ -118,6 +118,53 @@ def update_partial_reimbursement(
         )
 
     except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": str(e)
+            }
+        )
+@router.get("/partial-reimbursements")
+def get_partial_reimbursement(
+    claim_id: str,
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin"))
+):
+    try:
+
+        result = (
+            PartialReimbursementService
+            .get_partial_reimbursement(
+                claim_id,
+                db
+            )
+        )
+
+        if result is None:
+
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": "Partial reimbursement not found"
+                }
+            )
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "id": str(result.id),
+                "claim_id": str(result.claim_id),
+                "paid_amount": float(result.approved_amount),
+                "payment_date": (
+                    str(result.responded_at)
+                    if result.responded_at
+                    else None
+                )
+
+            }
+        )
+
+    except Exception as e:
+
         return JSONResponse(
             status_code=500,
             content={

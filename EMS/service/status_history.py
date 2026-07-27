@@ -173,3 +173,15 @@ class StatusHistoryService:
             "message":
             "Status updated"
         }
+    @staticmethod
+    def get_status_history(
+        claim_id,
+        db
+    ):
+
+        return (
+            StatusHistoryRepository.get_status_history(
+                claim_id,
+                db
+            )
+        )

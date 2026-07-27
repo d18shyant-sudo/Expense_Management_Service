@@ -49,3 +49,21 @@ class StatusHistoryRepository:
         db.commit()
         db.refresh(history)
         return history
+    @staticmethod
+    def get_status_history(
+        claim_id,
+        db
+    ):
+
+        claim = (
+            db.query(Expense_claim)
+            .filter(
+                Expense_claim.id == claim_id
+            )
+            .first()
+        )
+
+        if not claim:
+            return None
+
+        return claim.status_histories

@@ -24,15 +24,15 @@ router = APIRouter(
     response_model=LoginResponse
 )
 def login(
-    payload: LoginRequest,
+    login_detail: LoginRequest,
     db: Session = Depends(get_db)
 ):
     try:
 
         result = (
             AccountService.login(
-                payload.username,
-                payload.password,
+                login_detail.username,
+                login_detail.password,
                 db
             )
         )

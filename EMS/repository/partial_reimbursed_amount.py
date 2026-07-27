@@ -54,3 +54,21 @@ class PartialReimbursementRepository:
         db.commit()
         db.refresh(partial)
         return partial
+    @staticmethod
+    def get_partial_reimbursement(
+        claim_id,
+        db
+    ):
+
+        claim = (
+            db.query(Expense_claim)
+            .filter(
+                Expense_claim.id == claim_id
+            )
+            .first()
+        )
+
+        if not claim:
+            return None
+
+        return claim.partial_reimbursement

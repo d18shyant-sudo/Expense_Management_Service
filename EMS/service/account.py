@@ -1,6 +1,8 @@
 from repository.account import AccountRepository
 import bcrypt
 import jwt
+import logging
+logging.basicConfig(level=logging.INFO)
 
 from datetime import datetime, timedelta
 
@@ -27,17 +29,21 @@ class AccountService:
 
     @staticmethod
     def create_access_token(
-        username: str
+        username: str,db
     ):
 
         expires_at = (
             datetime.utcnow()
-            + timedelta(hours=1)
+            + timedelta(minutes=15)
         )
+        user = (
+                    AccountRepository.get_employee_by_username(username,db)
+                )
 
         payload = {
             "username": username,
-            "exp": expires_at
+            "exp": expires_at,
+            "role":user.role.role_name
         }
 
         token = jwt.encode(
@@ -65,20 +71,20 @@ class AccountService:
         account_id = (
             AccountRepository.get_employee_by_username(username,db)
         )
-
+        logging.info("credentials in db:",account.password)
         if not account:
             return None
-
+        
         if not AccountService.verify(
             password,
             account.password
         ):
             return None
-
+        
         token, expires_at = (
             AccountService
             .create_access_token(
-                username
+                username,db
             )
         )
 

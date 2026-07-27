@@ -61,3 +61,33 @@ class employee_service:
                 return []
         except Exception as e:
             raise e
+    @staticmethod
+    def create_employee(
+        employee_detail,
+        db: Session
+    ):
+
+        result = (
+            employee
+            .create_employee(
+                employee_detail,
+                db
+            )
+        )
+
+        return result
+    @staticmethod
+    def update_employee(
+        employee_id,
+        updated_detail,
+        db
+    ):
+
+        return (
+            employee
+            .update_employee(
+                employee_id,
+                updated_detail,
+                db
+            )
+        )
