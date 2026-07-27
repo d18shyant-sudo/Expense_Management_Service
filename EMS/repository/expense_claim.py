@@ -1,5 +1,4 @@
 from models.expense_claim import Expense_claim
-from models.employees import Employee
 from sqlalchemy.orm import Session
 
 class ExpenseClaimRepository:
@@ -39,60 +38,3 @@ class ExpenseClaimRepository:
         db.commit()
         db.refresh(claim)
         return claim
-    @staticmethod
-    def get_employee(
-        employee_id,
-        db
-    ):
-
-        return (
-            db.query(Employee)
-            .filter(
-                Employee.id == employee_id
-            )
-            .first()
-        )
-
-
-    @staticmethod
-    def get_employee_claims(
-        employee_id,
-        db
-    ):
-
-        return (
-            db.query(Expense_claim)
-            .filter(
-                Expense_claim.employees_id == employee_id
-            )
-            .all()
-        )
-
-
-    @staticmethod
-    def get_department_claims(
-        department_id,
-        db
-    ):
-
-        return (
-            db.query(Expense_claim)
-            .join(
-                Employee
-            )
-            .filter(
-                Employee.department_id == department_id
-            )
-            .all()
-        )
-
-
-    @staticmethod
-    def get_all_claims(
-        db
-    ):
-
-        return (
-            db.query(Expense_claim)
-            .all()
-        )

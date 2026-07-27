@@ -134,15 +134,3 @@ class ReimbursementService:
                 reimbursement.payment_date
             )
         }
-    @staticmethod
-    def get_reimbursement(
-        claim_id,
-        db
-    ):
-
-        return (
-            ReimbursementRepository.get_reimbursement(
-                claim_id,
-                db
-            )
-        )
