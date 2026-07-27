@@ -170,16 +170,3 @@ class PartialReimbursementService:
             "status":
             partial.status
         }
-    @staticmethod
-    def get_partial_reimbursement(
-        claim_id,
-        db
-    ):
-
-        return (
-            PartialReimbursementRepository
-            .get_partial_reimbursement(
-                claim_id,
-                db
-            )
-        )

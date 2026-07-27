@@ -12,9 +12,9 @@ from sqlalchemy.orm import Session
 from engine import get_db
 
 from service.status_history import (
-    StatusHistoryService)
+    StatusHistoryService
+)
 
-from auth import require_role
 router = APIRouter(
     prefix="/api/v1",
     tags=["Status_History"]
@@ -138,55 +138,6 @@ def update_status(
         )
 
     except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": str(e)
-            }
-        )
-@router.get("/status-history/{claim_id}")
-def get_status_history(
-    claim_id: str,
-    db: Session = Depends(get_db)
-):
-    try:
-
-        result = (
-            StatusHistoryService.get_status_history(
-                claim_id,
-                db
-            )
-        )
-
-        if result is None:
-
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error": "Expense claim not found"
-                }
-            )
-
-        return JSONResponse(
-            status_code=200,
-            content=[
-                {
-                    "id": str(history.id),
-                    "approver_id": str(history.approver_id),
-                    "approver_name": history.approver.name,
-                    "requested_amount": float(history.requested_amount),
-                    "approved_amount": float(history.approved_amount),
-                    "remaining_amount": float(history.remaining_amount),
-                    "status": history.status,
-                    "remarks": history.remarks,
-                    "action_time": str(history.action_time)
-                }
-                for history in result
-            ]
-        )
-
-    except Exception as e:
-
         return JSONResponse(
             status_code=500,
             content={

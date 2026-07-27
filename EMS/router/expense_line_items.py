@@ -21,7 +21,7 @@ router = APIRouter(
     prefix="/api/v1",
     tags=["Expense_Line_Items"]
 )
-from auth import require_role
+
 
 @router.post("/expense-line-items")
 def create_line_item(
@@ -104,52 +104,6 @@ def update_line_item(
         )
 
     except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": str(e)
-            }
-        )
-@router.get("/expense-line-items/{claim_id}")
-def get_expense_line_items(
-    claim_id: str,
-    db: Session = Depends(get_db)
-):
-    try:
-
-        result = (
-            ExpenseLineItemService
-            .get_expense_line_items(
-                claim_id,
-                db
-            )
-        )
-
-        if result is None:
-
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error": "Expense claim not found"
-                }
-            )
-
-        return JSONResponse(
-            status_code=200,
-            content=[
-                {
-                    "id": str(item.id),
-                    "category": item.category.name,
-                    "amount": float(item.amount),
-                    "description": item.description,
-                    "receipt_url": item.receipt_url
-                }
-                for item in result
-            ]
-        )
-
-    except Exception as e:
-
         return JSONResponse(
             status_code=500,
             content={

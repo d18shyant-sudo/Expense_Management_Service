@@ -27,21 +27,17 @@ class AccountService:
 
     @staticmethod
     def create_access_token(
-        username: str,db
+        username: str
     ):
 
         expires_at = (
             datetime.utcnow()
             + timedelta(hours=1)
         )
-        user = (
-                    AccountRepository.get_employee_by_username(username,db)
-                )
 
         payload = {
             "username": username,
-            "exp": expires_at,
-            "role":user.role.role_name
+            "exp": expires_at
         }
 
         token = jwt.encode(
@@ -82,7 +78,7 @@ class AccountService:
         token, expires_at = (
             AccountService
             .create_access_token(
-                username,db
+                username
             )
         )
 

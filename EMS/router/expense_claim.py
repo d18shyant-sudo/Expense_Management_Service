@@ -4,7 +4,6 @@ from fastapi import APIRouter,Depends
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from service.expense_claim import ExpenseClaimService
-from auth import require_role
 router = APIRouter(prefix="/api/v1",tags=["Expense_Claim"])
 
 @router.post("/expense-claims")
@@ -35,7 +34,7 @@ def create_claim(
             }
         )
 @router.put(
-    "/expense-claims/resubmit"
+    "/expense-claims/{claim_id}/resubmit"
 )
 def resubmit_claim(
     claim_id: str,
@@ -150,50 +149,6 @@ def reimburse_claim(
         )
 
     except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": str(e)
-            }
-        )
-@router.get("/expense-claims/{employee_id}")
-def get_claims(
-    employee_id: str,
-    db: Session = Depends(get_db)
-):
-    try:
-
-        result = ExpenseClaimService.get_claims(
-            employee_id,
-            db
-        )
-
-        if result is None:
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error": "Employee not found"
-                }
-            )
-
-        return JSONResponse(
-            status_code=200,
-            content=[
-                {
-                    "id": str(claim.id),
-                    "employee_id": str(claim.employees_id),
-                    "purpose": claim.purpose,
-                    "requested_amount": float(claim.requested_amount),
-                    "status": claim.status,
-                    "revision_count": claim.revision_count,
-                    "submitted_at": str(claim.submitted_at)
-                }
-                for claim in result
-            ]
-        )
-
-    except Exception as e:
-
         return JSONResponse(
             status_code=500,
             content={
