@@ -19,7 +19,7 @@ from schema.reimbursement import (
 from service.reimbursed_amount import (
     ReimbursementService
 )
-
+from auth import require_role
 router = APIRouter(
     prefix="/api/v1",
     tags=["Reimbursement"]
@@ -27,7 +27,7 @@ router = APIRouter(
 @router.post("/reimbursements")
 def create_reimbursement(
     payment: ReimbursementCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin"))
 ):
     try:
 
@@ -61,12 +61,12 @@ def create_reimbursement(
             }
         )
 @router.put(
-    "/reimbursements/{reimbursement_id}"
+    "/reimbursements"
 )
 def update_reimbursement(
     reimbursement_id: str,
     payment: ReimbursementUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin"))
 ):
     try:
 
@@ -106,6 +106,53 @@ def update_reimbursement(
         )
 
     except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": str(e)
+            }
+        )
+@router.get("/reimbursements")
+def get_reimbursed_amount(
+    claim_id: str,
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin"))
+):
+    try:
+
+        result = (
+            ReimbursementService.get_reimbursement(
+                claim_id,
+                db
+            )
+        )
+
+        if result is None:
+
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": "Reimbursement not found"
+                }
+            )
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "id": str(result.id),
+                "claim_id": str(result.claim_id),
+                "paid_amount": float(result.paid_amount),
+                "payment_date": (
+                    str(result.payment_date)
+                    if result.payment_date
+                    else None
+                ),
+                "payment_mode": result.payment_mode,
+                "transaction_reference": result.transaction_reference
+            }
+        )
+
+    except Exception as e:
+
         return JSONResponse(
             status_code=500,
             content={

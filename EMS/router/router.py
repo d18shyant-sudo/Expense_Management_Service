@@ -10,6 +10,7 @@ from router.budget_requests import router as budget_requests_router
 from router.reimbursed_amount import router as reimbursed_amount_router
 from router.partial_reimbursed_amount import router as partial_reimbursed_router
 from router.account import router as account_router
+from router.register import router as register_router
 api_router = APIRouter()
 api_router.include_router(employee_router)
 api_router.include_router(category_router)
@@ -22,3 +23,4 @@ api_router.include_router(budget_requests_router)
 api_router.include_router(reimbursed_amount_router)
 api_router.include_router(partial_reimbursed_router)
 api_router.include_router(account_router)
+api_router.include_router(register_router)

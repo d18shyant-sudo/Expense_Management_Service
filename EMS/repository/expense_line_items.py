@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from models.category import Category
 from models.expense_line_items import Expense_line_item
-
+from models.employees import Employee
+from models.expense_claim import Expense_claim
 class ExpenseLineItemRepository:
 
     @staticmethod
@@ -48,3 +49,21 @@ class ExpenseLineItemRepository:
         db.commit()
         db.refresh(line_item)
         return line_item
+    @staticmethod
+    def get_expense_line_items(
+        claim_id,
+        db
+    ):
+
+        expense_claim = (
+            db.query(Expense_claim)
+            .filter(
+                Expense_claim.id == claim_id
+            )
+            .first()
+        )
+
+        if not expense_claim:
+            return None
+
+        return expense_claim.line_items

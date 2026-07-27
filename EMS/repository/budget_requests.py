@@ -31,7 +31,7 @@ class BudgetRequestRepository:
     def create(
         budget_request,
         db: Session
-    ):
+    ):   
         db.add(budget_request)
         db.commit()
         db.refresh(budget_request)
@@ -45,3 +45,21 @@ class BudgetRequestRepository:
         db.commit()
         db.refresh(budget_request)
         return budget_request
+    @staticmethod
+    def get_budget_requests(
+        claim_id,
+        db
+    ):
+
+        claim = (
+            db.query(Expense_claim)
+            .filter(
+                Expense_claim.id == claim_id
+            )
+            .first()
+        )
+
+        if not claim:
+            return None
+
+        return claim.budget_requests

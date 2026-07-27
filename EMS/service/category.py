@@ -14,3 +14,31 @@ class category_service:
                 return []
         except Exception as e:
             raise e
+    @staticmethod
+    def create_category(
+        category_of_name,
+        db: Session
+    ):
+
+        return (
+            categories
+            .create_category(
+                category_of_name,
+                db
+            )
+        )
+    @staticmethod
+    def update_category(
+        category_id,
+        updated_category,
+        db
+    ):
+
+        return (
+            categories
+            .update_category(
+                category_id,
+                updated_category,
+                db
+            )
+        )

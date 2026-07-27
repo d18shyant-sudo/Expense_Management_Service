@@ -14,3 +14,31 @@ class department_service:
                 return []
         except Exception as e:
             raise e
+    @staticmethod
+    def create_department(
+        create_department_detail,
+        db
+    ):
+
+        return (
+            department
+            .create_department(
+                create_department_detail,
+                db
+            )
+        )
+    @staticmethod
+    def update_department(
+        department_id,
+        update_department_detail,
+        db
+    ):
+
+        return (
+            department
+            .update_department(
+                department_id,
+                update_department_detail,
+                db
+            )
+        )
