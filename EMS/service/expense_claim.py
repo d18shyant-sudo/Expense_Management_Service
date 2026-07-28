@@ -204,7 +204,7 @@ class ExpenseClaimService:
                 db
             )
 
-        elif role == "Finance_head":
+        elif role == "Finance_Head":
 
             return ExpenseClaimRepository.get_all_claims(
                 db

@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from models.expense_claim import Expense_claim
 from models.status_history import Status_history
 
 class StatusHistoryRepository:
@@ -14,8 +17,6 @@ class StatusHistoryRepository:
         remarks
     ):
 
-        print(">>> add_status_history called:", status)
-
         history = Status_history(
             claim_id=claim_id,
             approver_id=approver_id,
@@ -23,7 +24,8 @@ class StatusHistoryRepository:
             approved_amount=approved_amount,
             remaining_amount=remaining_amount,
             status=status,
-            remarks=remarks
+            remarks=remarks,
+            action_time=datetime.utcnow()
         )
 
         db.add(history)
@@ -31,3 +33,16 @@ class StatusHistoryRepository:
         db.refresh(history)
 
         return history
+
+    @staticmethod
+    def get_status_history(claim_id, db):
+        claim = (
+            db.query(Expense_claim)
+            .filter(Expense_claim.id == claim_id)
+            .first()
+        )
+
+        if not claim:
+            return None
+
+        return claim.status_histories

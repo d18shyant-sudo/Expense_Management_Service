@@ -91,16 +91,16 @@ def approve_claim(
         )
 
         if result is None:
-         return JSONResponse(
-        status_code=404,
-        content={"error": "Claim not found"}
-    )
+             return JSONResponse(
+                 status_code=404,
+                 content={"error": "Claim not found"}
+             )
 
         if isinstance(result, str):
-         return JSONResponse(
-        status_code=400,
-        content={"error": result}
-    )
+             return JSONResponse(
+                 status_code=400,
+                 content={"error": result}
+             )
 
         return JSONResponse(
             status_code=200,
@@ -131,16 +131,16 @@ def reimburse_claim(
         )
 
         if result is None:
-         return JSONResponse(
-        status_code=404,
-        content={"error": "Claim not found"}
-        )
+           return JSONResponse(
+               status_code=404,
+               content={"error": "Claim not found"}
+           )
 
         if isinstance(result, str):
-         return JSONResponse(
-           status_code=400,
-           content={"error": result}
-        )
+           return JSONResponse(
+               status_code=400,
+               content={"error": result}
+           )
 
         return JSONResponse(
             status_code=200,
