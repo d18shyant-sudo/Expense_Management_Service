@@ -7,7 +7,7 @@ from service.departments import department_service
 from auth import require_role
 router = APIRouter(prefix="/api/v1",tags=["Departments"])
 @router.get("/get-all-department-name",response_model=list[Department_name])
-def get_departments(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Employee","Manager"))):
+def get_departments(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Employee","Manager","admin"))):
     try:
         results = department_service.get_departments(db)
         if results:

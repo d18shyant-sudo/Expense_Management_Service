@@ -36,7 +36,7 @@ class BudgetRequestService:
 
             claim_id=claim.id,
 
-            requested_by=employee.id,
+            requested_by=employee.department.manager.id,
 
             department_id=
             employee.department_id,
@@ -44,7 +44,7 @@ class BudgetRequestService:
             requested_amount=
             payload.requested_amount,
 
-            status=payload.status,
+            status="pending",
 
             remarks=payload.remarks,
 
@@ -68,7 +68,8 @@ class BudgetRequestService:
             "department_id":
             str(created_budget.department_id),
             "requested_by":
-            str(created_budget.requested_by)
+            str(created_budget.requested_by),
+            "status":"pending"
         }
 
     @staticmethod
@@ -107,7 +108,7 @@ class BudgetRequestService:
 
 
      budget.claim_id = claim.id
-     budget.requested_by = employee.id
+     budget.requested_by = employee.department.manager.id
      budget.department_id = employee.department_id
 
 

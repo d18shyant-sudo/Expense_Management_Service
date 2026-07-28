@@ -1,169 +1,42 @@
-from fastapi import (
-    APIRouter,
-    Depends
-)
-from schema.status_history import StatusHistoryCreate,StatusUpdate
-from fastapi.responses import (
-    JSONResponse
-)
-
+from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from engine import get_db
-
-from service.status_history import (
-    StatusHistoryService)
-
+from service.status_history import StatusHistoryService
 from auth import require_role
+
 router = APIRouter(
     prefix="/api/v1",
-    tags=["Status_History"]
+    tags=["Status History"]
 )
-@router.post("/status-history")
-def create_status_history(
-    payload: StatusHistoryCreate,
-    db: Session = Depends(get_db),user = Depends(require_role("Employee","Manager"))
-):
-    try:
 
-        result = (
-            StatusHistoryService
-            .create_status_history(
-                payload,
-                db
-            )
-        )
 
-        if result == "CLAIM_NOT_FOUND":
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error":
-                    "Claim not found"
-                }
-            )
-
-        return JSONResponse(
-            status_code=200,
-            content=result
-        )
-
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": str(e)
-            }
-        )
-@router.put(
-    "/status-history/claim"
-)
-def update_status_claim(
-    history_id: str,
-    payload: StatusHistoryCreate,
-    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin","Manager"))
-):
-    try:
-
-        result = (
-            StatusHistoryService
-            .update_status_claim(
-                history_id,
-                payload,
-                db
-            )
-        )
-
-        if result == "HISTORY_NOT_FOUND":
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error":
-                    "History not found"
-                }
-            )
-
-        if result == "CLAIM_NOT_FOUND":
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error":
-                    "Claim not found"
-                }
-            )
-
-        return JSONResponse(
-            status_code=200,
-            content=result
-        )
-
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": str(e)
-            }
-        )
-@router.put(
-    "/status-history/status"
-)
-def update_status(
-    history_id: str,
-    payload: StatusUpdate,
-    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin","Manager","Finance_Head"))
-):
-    try:
-
-        result = (
-            StatusHistoryService
-            .update_status(
-                history_id,
-                payload,
-                db
-            )
-        )
-
-        if result == "HISTORY_NOT_FOUND":
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error":
-                    "History not found"
-                }
-            )
-
-        return JSONResponse(
-            status_code=200,
-            content=result
-        )
-
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": str(e)
-            }
-        )
 @router.get("/status-history")
 def get_status_history(
     claim_id: str,
-    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin","Manager","Finance_Head","Employee"))
+    db: Session = Depends(get_db),
+    user=Depends(
+        require_role(
+            "Employee",
+            "Manager",
+            "Finance_admin",
+            "Finance_Head"
+        )
+    ),
 ):
     try:
 
-        result = (
-            StatusHistoryService.get_status_history(
-                claim_id,
-                db
-            )
+        result = StatusHistoryService.get_status_history(
+            claim_id,
+            db
         )
 
-        if result is None:
-
+        if not result:
             return JSONResponse(
                 status_code=404,
                 content={
-                    "error": "Expense claim not found"
+                    "error": "Status history not found"
                 }
             )
 
@@ -172,24 +45,24 @@ def get_status_history(
             content=[
                 {
                     "id": str(history.id),
+                    "claim_id": str(history.claim_id),
                     "approver_id": str(history.approver_id),
-                    "approver_name": history.approver.name,
+                    "approver_name": history.approver.name if history.approver else None,
                     "requested_amount": float(history.requested_amount),
                     "approved_amount": float(history.approved_amount),
                     "remaining_amount": float(history.remaining_amount),
                     "status": history.status,
                     "remarks": history.remarks,
-                    "action_time": str(history.action_time)
+                    "action_time": str(history.action_time),
                 }
                 for history in result
-            ]
+            ],
         )
 
     except Exception as e:
-
         return JSONResponse(
             status_code=500,
             content={
                 "error": str(e)
-            }
+            },
         )

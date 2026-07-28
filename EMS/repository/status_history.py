@@ -1,69 +1,33 @@
-from sqlalchemy.orm import Session
-
-from models.expense_claim import Expense_claim
 from models.status_history import Status_history
 
 class StatusHistoryRepository:
 
     @staticmethod
-    def get_claim_by_id(
+    def add_status_history(
+        db,
         claim_id,
-        db: Session
+        approver_id,
+        requested_amount,
+        approved_amount,
+        remaining_amount,
+        status,
+        remarks
     ):
-        return (
-            db.query(Expense_claim)
-            .filter(
-                Expense_claim.id == claim_id
-            )
-            .first()
+
+        print(">>> add_status_history called:", status)
+
+        history = Status_history(
+            claim_id=claim_id,
+            approver_id=approver_id,
+            requested_amount=requested_amount,
+            approved_amount=approved_amount,
+            remaining_amount=remaining_amount,
+            status=status,
+            remarks=remarks
         )
 
-    @staticmethod
-    def get_history_by_id(
-        history_id,
-        db: Session
-    ):
-        return (
-            db.query(Status_history)
-            .filter(
-                Status_history.id == history_id
-            )
-            .first()
-        )
-
-    @staticmethod
-    def create(
-        history,
-        db: Session
-    ):
         db.add(history)
         db.commit()
         db.refresh(history)
+
         return history
-
-    @staticmethod
-    def save(
-        history,
-        db: Session
-    ):
-        db.commit()
-        db.refresh(history)
-        return history
-    @staticmethod
-    def get_status_history(
-        claim_id,
-        db
-    ):
-
-        claim = (
-            db.query(Expense_claim)
-            .filter(
-                Expense_claim.id == claim_id
-            )
-            .first()
-        )
-
-        if not claim:
-            return None
-
-        return claim.status_histories

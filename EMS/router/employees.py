@@ -7,7 +7,7 @@ from service.employee import employee_service
 from auth import require_role
 router = APIRouter(prefix="/api/v1",tags=["Employees"])
 @router.get("/get-employees",response_model=list[Get_Employees])
-def get_all_employees(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head"))):
+def get_all_employees(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head","admin"))):
     try:
         results = employee_service.get_all_employees(db)
         if results:

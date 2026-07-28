@@ -7,7 +7,7 @@ from service.category import category_service
 from auth import require_role
 router = APIRouter(prefix="/api/v1",tags=["Categories"])
 @router.get("/get-all-category-name",response_model=list[Category_name])
-def get_category(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Manager","Employee"))):
+def get_category(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Manager","Employee","admin"))):
     try:
         results = category_service.get_category(db)
         if results:
