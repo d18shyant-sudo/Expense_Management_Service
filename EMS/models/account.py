@@ -5,4 +5,3 @@ class Account(Base):
     username = Column(String,primary_key=True)
     password = Column(String)
     email = Column(String, unique=True, nullable=False)
-

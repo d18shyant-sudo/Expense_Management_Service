@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 from service.departments import department_service
 from auth import require_role
 router = APIRouter(prefix="/api/v1",tags=["Departments"])
-@router.get("/get-department-name",response_model=list[Department_name])
-def get_departments(db:Session = Depends(get_db)):
+@router.get("/get-all-department-name",response_model=list[Department_name])
+def get_departments(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Employee","Manager","admin"))):
     try:
         results = department_service.get_departments(db)
         if results:
@@ -19,7 +19,7 @@ def get_departments(db:Session = Depends(get_db)):
 @router.post("/departments")
 def create_department(
     create_department_detail: DepartmentCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("admin"))
 ):
     try:
 
@@ -86,7 +86,7 @@ def create_department(
 def update_department(
     department_id: str,
     update_department_detail: DepartmentUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("admin"))
 ):
     try:
 

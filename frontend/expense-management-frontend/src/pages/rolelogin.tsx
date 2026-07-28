@@ -6,9 +6,12 @@ import {
   User,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function RoleLogin() {
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -59,6 +62,9 @@ export default function RoleLogin() {
 
       alert("Login Successful!");
 
+      // Change this if you have a dashboard route
+      // navigate("/dashboard");
+
     } catch (err: any) {
       console.error(err);
 
@@ -73,15 +79,12 @@ export default function RoleLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-green-50 to-green-100 flex items-center justify-center px-4">
-
       <div className="w-full max-w-md">
-
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
 
           {/* Header */}
 
           <div className="bg-green-800 text-white p-10 text-center">
-
             <div className="w-20 h-20 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-5">
               <Lock size={36} />
             </div>
@@ -93,7 +96,6 @@ export default function RoleLogin() {
             <p className="text-green-100 mt-2">
               Sign in to continue
             </p>
-
           </div>
 
           {/* Form */}
@@ -105,14 +107,14 @@ export default function RoleLogin() {
               className="space-y-6"
             >
 
-              <div>
+              {/* Username */}
 
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Username
                 </label>
 
                 <div className="relative">
-
                   <User
                     size={20}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -127,13 +129,12 @@ export default function RoleLogin() {
                     placeholder="Enter username"
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:border-green-700 focus:ring-2 focus:ring-green-200 outline-none"
                   />
-
                 </div>
-
               </div>
 
-              <div>
+              {/* Password */}
 
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Password
                 </label>
@@ -174,8 +175,9 @@ export default function RoleLogin() {
                   </button>
 
                 </div>
-
               </div>
+
+              {/* Error */}
 
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-600 text-sm">
@@ -183,16 +185,21 @@ export default function RoleLogin() {
                 </div>
               )}
 
-              <div className="flex justify-end">
+              {/* Forgot Password */}
 
+              <div className="flex justify-end">
                 <button
                   type="button"
-                  className="text-sm text-green-700 hover:text-orange-500"
+                  onClick={() =>
+                    navigate("/forgot-password")
+                  }
+                  className="text-sm font-medium text-green-700 hover:text-green-800 transition"
                 >
                   Forgot Password?
                 </button>
-
               </div>
+
+              {/* Login Button */}
 
               <button
                 type="submit"
@@ -214,9 +221,7 @@ export default function RoleLogin() {
           </div>
 
         </div>
-
       </div>
-
     </div>
   );
 }

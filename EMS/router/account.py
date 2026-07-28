@@ -21,20 +21,18 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/login",
-    response_model=LoginResponse
-)
+@router.post("/login")
 def login(
     payload: LoginRequest,
     db: Session = Depends(get_db)
 ):
-
     result = AccountService.login(
         payload.username,
         payload.password,
         db
     )
+
+    return result
 
     if not result:
         return JSONResponse(
@@ -44,7 +42,7 @@ def login(
             }
         )
 
-    return JSONResponse(
+        return JSONResponse(
         status_code=200,
         content=result
     )

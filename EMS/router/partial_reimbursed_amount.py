@@ -29,7 +29,7 @@ router = APIRouter(
 )
 def create_partial_reimbursement(
     payment: PartialReimbursementCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin"))
 ):
     try:
 
@@ -72,12 +72,12 @@ def create_partial_reimbursement(
             }
         )
 @router.put(
-    "/partial-reimbursements/{partial_id}"
+    "/partial-reimbursements"
 )
 def update_partial_reimbursement(
     partial_id: str,
     payment: PartialReimbursementUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin"))
 ):
     try:
 
@@ -124,10 +124,10 @@ def update_partial_reimbursement(
                 "error": str(e)
             }
         )
-@router.get("/partial-reimbursement/{claim_id}")
+@router.get("/partial-reimbursements")
 def get_partial_reimbursement(
     claim_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Employee","Manager"))
 ):
     try:
 

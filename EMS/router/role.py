@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 from service.role import role_service
 from auth import require_role
 router = APIRouter(prefix="/api/v1",tags=["Roles"])
-@router.get("/get-role-name",response_model=list[Role_name])
-def get_roles(db:Session = Depends(get_db)):
+@router.get("/get-roles-name",response_model=list[Role_name])
+def get_roles(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head"))):
     try:
         results = role_service.get_roles(db)
         if results:
@@ -17,7 +17,7 @@ def get_roles(db:Session = Depends(get_db)):
     except Exception as e:
         return JSONResponse(status_code=500,content={"Error":str(e)})
 @router.post("/post-role-name",response_model=Role_name)
-def post_role(new_role:Role_name,db:Session = Depends(get_db)):
+def post_role(new_role:Role_name,db:Session = Depends(get_db),user = Depends(require_role("admin"))):
     try:
         results = role_service.post_role(db,new_role)
         if results:
@@ -27,7 +27,7 @@ def post_role(new_role:Role_name,db:Session = Depends(get_db)):
     except Exception as e:
          return JSONResponse(status_code=500,content={"Error":str(e)})
 @router.put("/update-role-name",response_model=Role_name)
-def update_role(update_role:Update_Role,db:Session = Depends(get_db)):
+def update_role(update_role:Update_Role,db:Session = Depends(get_db),user = Depends(require_role("admin"))):
     try:
         results = role_service.update_role(db,update_role)
         if results:

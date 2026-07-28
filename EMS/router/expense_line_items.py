@@ -26,7 +26,7 @@ from auth import require_role
 @router.post("/expense-line-items")
 def create_line_item(
     line_item: ExpenseLineItemCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Employee","Manager"))
 ):
     try:
 
@@ -62,12 +62,12 @@ def create_line_item(
 
 
 @router.put(
-    "/expense-line-items/{line_item_id}"
+    "/expense-line-items"
 )
 def update_line_item(
     line_item_id: str,
     line_item: ExpenseLineItemUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Employee","Manager"))
 ):
     try:
 
@@ -113,7 +113,7 @@ def update_line_item(
 @router.get("/expense-line-items/{claim_id}")
 def get_expense_line_items(
     claim_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Manager","Employee"))
 ):
     try:
 

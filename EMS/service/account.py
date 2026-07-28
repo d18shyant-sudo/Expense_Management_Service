@@ -1,22 +1,15 @@
 from repository.account import AccountRepository
+from utils.otp_store import save_otp, verify_otp
+from utils.emails import send_otp 
+
 import bcrypt
-import jwt
-from passlib.context import CryptContext
-from utils.otp_store import verify_otp, save_otp
-from utils.emails import send_otp
-from schema.account import VerifyOtpRequest
-from datetime import datetime, timedelta,UTC
+from jose import jwt
 
+from datetime import datetime, timedelta
 
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
-)
+import logging
 
-def hash_password(password: str):
-    return pwd_context.hash(password)
-
-
+logging.basicConfig(level=logging.INFO)
 
 
 class AccountService:
@@ -31,10 +24,7 @@ class AccountService:
         return hashed.decode("utf-8")
 
     @staticmethod
-    def verify(
-        password: str,
-        hashed_password: str
-    ) -> bool:
+    def verify(password: str, hashed_password: str) -> bool:
         return bcrypt.checkpw(
             password.encode("utf-8"),
             hashed_password.encode("utf-8")
@@ -43,128 +33,143 @@ class AccountService:
     @staticmethod
     def create_access_token(username: str, db):
 
-     expires_at = datetime.utcnow() + timedelta(hours=1)
-
-     account = AccountRepository.get_by_username(username, db)
-
-     if not account:
-        return None, None
-
-     user = AccountRepository.get_employee_by_email(
-        account.email,
-        db
-    )
-
-     if not user:
-        return None, None
-
-     payload = {
-        "username": username,
-        "exp": int(expires_at.timestamp()),
-        "role": user.role.role_name
-    }
-
-     token = jwt.encode(
-        payload,
-        "secret_key",
-        algorithm="HS256"
-    )
-
-     return token, expires_at
-
-    @staticmethod
-    def login(
-     username: str,
-     password: str,
-     db
-):
-
-     account = AccountRepository.get_by_username(
-        username,
-        db
-    )
-
-     if not account:
-        return None
- 
-     if not AccountService.verify(
-        password,
-        account.password
-    ):
-        return None
-
-     employee = AccountRepository.get_employee_by_email(
-        account.email,
-        db
-    )
-
-     if not employee:
-        return None
-
-     token, expires_at = (
-        AccountService.create_access_token(
+        account = AccountRepository.get_by_username(
             username,
             db
         )
-    )
 
-     return {
-    "token": token,
-    "expires_at": expires_at.isoformat(),
-    "authentication_type": "Bearer",
-    "employee_id": str(employee.id)
-}
-    
+        if account is None:
+            raise Exception("Account not found")
+
+        employee = AccountRepository.get_employee_by_email(
+            account.email,
+            db
+        )
+
+        if employee is None:
+            raise Exception("Employee not found")
+
+        expires_at = datetime.utcnow() + timedelta(hours=1)
+
+        payload = {
+            "sub": username,
+            "role": employee.role.role_name,
+            "exp": expires_at
+        }
+
+        token = jwt.encode(
+            payload,
+            "secret_key",
+            algorithm="HS256"
+        )
+
+        return token, expires_at
+
     @staticmethod
-    def forgot_password(payload: ForgotPasswordRequest, db: Session):
-      account = AccountRepository.get_by_email(payload.email, db)
+    def login(
+        username: str,
+        password: str,
+        db
+    ):
 
-      if not account:
-        return {"message": "Email not found"}
+        account = AccountRepository.get_by_username(
+            username,
+            db
+        )
 
-      otp = save_otp(payload.email)
-      print("OTP returned from save_otp():", otp)
-      send_otp(payload.email, otp)
+        if account is None:
+            return None
 
-      return {"message": "OTP sent successfully"}
+        if not AccountService.verify(
+            password,
+            account.password
+        ):
+            return None
 
+        employee = AccountRepository.get_employee_by_email(
+            account.email,
+            db
+        )
+
+        if employee is None:
+            return None
+
+        token, expires_at = AccountService.create_access_token(
+            username,
+            db
+        )
+
+        return {
+            "token": token,
+            "expires_at": expires_at.isoformat(),
+            "authentication_type": "Bearer",
+            "employee_id": str(employee.id)
+        }
 
     @staticmethod
-    def verify_otp(payload: VerifyOtpRequest):
-      if verify_otp(payload.email, payload.otp):
-        return {"message": "OTP verified"}
+    def forgot_password(payload, db):
 
-      return {"message": "Invalid OTP"}
+        account = AccountRepository.get_by_email(
+            payload.email,
+            db
+        )
 
-    
-    
+        if not account:
+            return {
+                "message": "Email not found"
+            }
+
+        otp = save_otp(payload.email)
+
+        print("OTP:", otp)
+
+        send_otp(
+            payload.email,
+            otp
+        )
+
+        return {
+            "message": "OTP sent successfully"
+        }
+
+    @staticmethod
+    def verify_otp(payload):
+
+        if verify_otp(
+            payload.email,
+            payload.otp
+        ):
+            return {
+                "message": "OTP verified"
+            }
+
+        return {
+            "message": "Invalid OTP"
+        }
 
     @staticmethod
     def reset_password(payload, db):
 
-     print("RESET EMAIL:", payload.email)
+        account = AccountRepository.get_by_email(
+            payload.email,
+            db
+        )
 
-     account = AccountRepository.get_by_email(
-        payload.email,
-        db
-    )
+        if not account:
+            return {
+                "message": "Email not found"
+            }
 
-     print("ACCOUNT FOUND:", account)
+        hashed_password = AccountService.encrypt(
+            payload.new_password
+        )
 
-     if not account:
+        AccountRepository.update_password(
+            payload.email,
+            hashed_password,
+            db
+        )
+
         return {
-            "message": "Email not found"
+            "message": "Password reset successfully"
         }
-
-     hashed_password = hash_password(
-        payload.new_password
-    )
-
-     account.password = hashed_password
-
-     db.commit()
-     db.refresh(account)
-
-     return {
-        "message": "Password reset successfully"
-    }
