@@ -111,10 +111,10 @@ def approve_claim(
             }
         )
 
-    except Exception as e:
+    except Exception:
         return JSONResponse(
             status_code=500,
-            content={"error": str(e)}
+            content={"error": "Internal server error"}
         )
 @router.put("/expense-claims/reimburse")
 def reimburse_claim(
@@ -151,10 +151,10 @@ def reimburse_claim(
             }
         )
 
-    except Exception as e:
+    except Exception:
         return JSONResponse(
             status_code=500,
-            content={"error": str(e)}
+            content={"error": "Internal server error"}
         )
 @router.get("/expense-claims")
 def get_claims(
