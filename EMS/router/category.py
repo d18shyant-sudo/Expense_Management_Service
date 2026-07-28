@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 from service.category import category_service
 from auth import require_role
 router = APIRouter(prefix="/api/v1",tags=["Categories"])
-@router.get("/get-category-name",response_model=list[Category_name])
-def get_category(db:Session = Depends(get_db)):
+@router.get("/get-all-category-name",response_model=list[Category_name])
+def get_category(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Manager","Employee","admin"))):
     try:
         results = category_service.get_category(db)
         if results:
@@ -19,7 +19,7 @@ def get_category(db:Session = Depends(get_db)):
 @router.post("/categories")
 def create_category(
     category_detail: Category_name,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("admin"))
 ):
     try:
 
@@ -65,7 +65,7 @@ def create_category(
 def update_category(
     category_id: str,
     update_category: Category_name,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("admin"))
 ):
     try:
 

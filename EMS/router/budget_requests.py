@@ -28,7 +28,7 @@ from auth import require_role
 @router.post("/budget-requests")
 def create_budget_request(
     request: BudgetRequestCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Manager"))
 ):
     try:
 
@@ -71,18 +71,18 @@ def create_budget_request(
             }
         )
 @router.put(
-    "/budget-requests/{budget_request_id}"
+    "/budget-requests"
 )
 def update_budget_request(
     budget_request_id: str,
     request: BudgetRequestUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Manager","Finance_admin","Finance_Head"))
 ):
     try:
 
         result = (
             BudgetRequestService
-            .update_budget_request(
+            .update_budget_request(user,
                 budget_request_id,
                 request,
                 db
@@ -121,10 +121,10 @@ def update_budget_request(
                 "error": str(e)
             }
         )
-@router.get("/budget-requests/{claim_id}")
+@router.get("/budget-requests")
 def get_budget_requests(
     claim_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Manager"))
 ):
     try:
 

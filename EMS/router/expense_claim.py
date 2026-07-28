@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/v1",tags=["Expense_Claim"])
 @router.post("/expense-claims")
 def create_claim(
     claim: Claim_Create,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Employee","Manager"))
 ):
     try:
         result = ExpenseClaimService.create_claim(
@@ -40,7 +40,7 @@ def create_claim(
 def resubmit_claim(
     claim_id: str,
     claim: Claim_Resubmit,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Employee","Manager"))
 ):
     try:
 
@@ -76,90 +76,90 @@ def resubmit_claim(
                 "error": str(e)
             }
         )
-@router.put(
-    "/expense-claims/{claim_id}/approve"
-)
+@router.put("/expense-claims/approve")
 def approve_claim(
     claim_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(require_role("Manager", "Finance_admin"))
 ):
     try:
 
         result = ExpenseClaimService.approve_claim(
             claim_id,
+            user["employee_id"],
             db
         )
 
-        if not result:
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error": "Claim not found"
-                }
-            )
+        if result is None:
+             return JSONResponse(
+                 status_code=404,
+                 content={"error": "Claim not found"}
+             )
+
+        if isinstance(result, str):
+             return JSONResponse(
+                 status_code=400,
+                 content={"error": result}
+             )
 
         return JSONResponse(
             status_code=200,
             content={
-                "message":
-                "Claim approved successfully",
+                "message": "Claim approved successfully",
                 "claim_id": str(result.id),
-                "approved_at":
-                str(result.approved_at)
+                "approved_at": str(result.approved_at)
             }
         )
 
-    except Exception as e:
+    except Exception:
         return JSONResponse(
             status_code=500,
-            content={
-                "error": str(e)
-            }
+            content={"error": "Internal server error"}
         )
-@router.put(
-    "/expense-claims/{claim_id}/reimburse"
-)
+@router.put("/expense-claims/reimburse")
 def reimburse_claim(
     claim_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(require_role("Finance_Head", "Finance_admin"))
 ):
     try:
 
         result = ExpenseClaimService.reimburse_claim(
             claim_id,
+            user["employee_id"],
             db
         )
 
-        if not result:
-            return JSONResponse(
-                status_code=404,
-                content={
-                    "error": "Claim not found"
-                }
-            )
+        if result is None:
+           return JSONResponse(
+               status_code=404,
+               content={"error": "Claim not found"}
+           )
+
+        if isinstance(result, str):
+           return JSONResponse(
+               status_code=400,
+               content={"error": result}
+           )
 
         return JSONResponse(
             status_code=200,
             content={
-                "message":
-                "Claim reimbursed successfully",
+                "message": "Claim reimbursed successfully",
                 "claim_id": str(result.id),
-                "reimbursed_at":
-                str(result.reimbursed_at)
+                "reimbursed_at": str(result.reimbursed_at)
             }
         )
 
-    except Exception as e:
+    except Exception:
         return JSONResponse(
             status_code=500,
-            content={
-                "error": str(e)
-            }
+            content={"error": "Internal server error"}
         )
-@router.get("/expense-claims/{employee_id}")
+@router.get("/expense-claims")
 def get_claims(
     employee_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Manager","Employee"))
 ):
     try:
 

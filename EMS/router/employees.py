@@ -7,7 +7,7 @@ from service.employee import employee_service
 from auth import require_role
 router = APIRouter(prefix="/api/v1",tags=["Employees"])
 @router.get("/get-employees",response_model=list[Get_Employees])
-def get_all_employees(db:Session = Depends(get_db)):
+def get_all_employees(db:Session = Depends(get_db),user = Depends(require_role("Finance_Head","admin"))):
     try:
         results = employee_service.get_all_employees(db)
         if results:
@@ -17,7 +17,7 @@ def get_all_employees(db:Session = Depends(get_db)):
     except Exception as e:
         return JSONResponse(status_code=500,content={"Error":str(e)})
 @router.get("/get-employee",response_model=Get_Employees)
-def get_employee_name(name:str,db:Session = Depends(get_db)):
+def get_employee_name(name:str,db:Session = Depends(get_db),user = Depends(require_role("Finance_Head"))):
     try:
         results = employee_service.get_employees_name(name,db)
         if results:
@@ -27,7 +27,7 @@ def get_employee_name(name:str,db:Session = Depends(get_db)):
     except Exception as e:
         return JSONResponse(status_code=500,content={"Error":str(e)})
 @router.get("/get-employee-role",response_model=Get_Employees)
-def get_employee_role(role:str,db:Session = Depends(get_db)):
+def get_employee_role(role:str,db:Session = Depends(get_db),user = Depends(require_role("Finance_Head"))):
     try:
         results = employee_service.get_employees_role(role,db)
         if results:
@@ -37,7 +37,7 @@ def get_employee_role(role:str,db:Session = Depends(get_db)):
     except Exception as e:
         return JSONResponse(status_code=500,content={"Error":str(e)})
 @router.get("/get-employee-department",response_model=list[Employee_department])
-def get_employee_department(department_name:str,db:Session = Depends(get_db)):
+def get_employee_department(department_name:str,db:Session = Depends(get_db),user = Depends(require_role("Finance_Head","Manager","Finance_admin"))):
     try:
         results = employee_service.get_employees_department(department_name,db)
         if results:
@@ -49,7 +49,7 @@ def get_employee_department(department_name:str,db:Session = Depends(get_db)):
 @router.post("/employees")
 def create_employee(
     employee_detail: EmployeeCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("admin"))
 ):
 
     try:
@@ -109,7 +109,7 @@ def create_employee(
 def update_employee(
     employee_id: str,
     updated_detail: EmployeeUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("admin"))
 ):
     try:
 

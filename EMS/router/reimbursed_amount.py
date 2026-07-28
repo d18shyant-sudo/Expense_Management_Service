@@ -27,7 +27,7 @@ router = APIRouter(
 @router.post("/reimbursements")
 def create_reimbursement(
     payment: ReimbursementCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin"))
 ):
     try:
 
@@ -61,12 +61,12 @@ def create_reimbursement(
             }
         )
 @router.put(
-    "/reimbursements/{reimbursement_id}"
+    "/reimbursements"
 )
 def update_reimbursement(
     reimbursement_id: str,
     payment: ReimbursementUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_admin"))
 ):
     try:
 
@@ -112,10 +112,10 @@ def update_reimbursement(
                 "error": str(e)
             }
         )
-@router.get("/reimbursed-amount/{claim_id}")
+@router.get("/reimbursements")
 def get_reimbursed_amount(
     claim_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin"))
 ):
     try:
 

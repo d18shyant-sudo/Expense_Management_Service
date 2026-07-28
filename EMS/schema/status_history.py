@@ -1,14 +1,19 @@
-from pydantic import BaseModel
-from uuid import UUID
+from datetime import datetime
 from decimal import Decimal
-class StatusHistoryCreate(BaseModel):
-    claim_id: UUID
-    approved_amount: Decimal
-    status: str
-    remarks: str
+from pydantic import BaseModel
 
 
-class StatusUpdate(BaseModel):
+class StatusHistoryResponse(BaseModel):
+    id: str
+    claim_id: str
+    approver_id: str
+    approver_name: str
+    requested_amount: Decimal
+    approved_amount: Decimal
+    remaining_amount: Decimal
     status: str
     remarks: str
-    approved_amount: Decimal
+    action_time: datetime
+
+    class Config:
+        from_attributes = True

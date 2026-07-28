@@ -36,7 +36,7 @@ class BudgetRequestService:
 
             claim_id=claim.id,
 
-            requested_by=employee.id,
+            requested_by=employee.department.manager.id,
 
             department_id=
             employee.department_id,
@@ -44,7 +44,7 @@ class BudgetRequestService:
             requested_amount=
             payload.requested_amount,
 
-            status=payload.status,
+            status="pending",
 
             remarks=payload.remarks,
 
@@ -68,82 +68,102 @@ class BudgetRequestService:
             "department_id":
             str(created_budget.department_id),
             "requested_by":
-            str(created_budget.requested_by)
+            str(created_budget.requested_by),
+            "status":"pending"
         }
 
     @staticmethod
     def update_budget_request(
-        budget_request_id,
-        payload,
-        db
-    ):
+    user,
+    budget_request_id,
+    payload,
+    db
+):
 
-        budget = (
-            BudgetRequestRepository
-            .get_budget_request_by_id(
-                budget_request_id,
-                db
-            )
+     budget = (
+        BudgetRequestRepository
+        .get_budget_request_by_id(
+            budget_request_id,
+            db
         )
+    )
 
-        if not budget:
-            return "BUDGET_REQUEST_NOT_FOUND"
+     if not budget:
+        return "BUDGET_REQUEST_NOT_FOUND"
 
-        claim = (
-            BudgetRequestRepository
-            .get_claim_by_id(
-                payload.claim_id,
-                db
-            )
+
+     claim = (
+        BudgetRequestRepository
+        .get_claim_by_id(
+            payload.claim_id,
+            db
         )
+    )
 
-        if not claim:
-            return "CLAIM_NOT_FOUND"
+     if not claim:
+        return "CLAIM_NOT_FOUND"
 
-        employee = claim.employee
 
-        budget.claim_id = claim.id
-        budget.requested_by = employee.id
-        budget.department_id = (
-            employee.department_id
-        )
+     employee = claim.employee
 
-        if payload.requested_amount is not None:
-            budget.requested_amount = (
-                payload.requested_amount
-            )
+
+     budget.claim_id = claim.id
+     budget.requested_by = employee.department.manager.id
+     budget.department_id = employee.department_id
+
+
+     role = user["role"]
+
+
+    # Manager can only create/update request
+    # status should remain Pending
+     if role == "Manager":
+
+        budget.status = "Pending"
+
+
+    # Finance Admin can change status if provided
+     elif role == "Finance_admin":
 
         if payload.status is not None:
             budget.status = payload.status
 
-        if payload.remarks is not None:
-            budget.remarks = payload.remarks
 
-        budget.updated_at = (
-            datetime.utcnow()
+    # Finance Head has full control
+     elif role == "Finance_Head":
+
+        if payload.status is not None:
+            budget.status = payload.status
+
+
+     if payload.requested_amount is not None:
+        budget.requested_amount = (
+            payload.requested_amount
         )
 
-        BudgetRequestRepository.save(
-            budget,
-            db
-        )
 
-        return {
-            "message":
-            "Budget request updated",
-            "claim_id":
-            str(budget.claim_id),
-            "department_id":
-            str(budget.department_id),
-            "requested_by":
-            str(budget.requested_by),
-            "requested_amount":
-            float(budget.requested_amount),
-            "status":
-            budget.status,
-            "remarks":
-            budget.remarks
-        }
+     if payload.remarks is not None:
+        budget.remarks = payload.remarks
+
+
+     budget.updated_at = datetime.utcnow()
+
+
+     BudgetRequestRepository.save(
+        budget,
+        db
+    )
+
+
+     return {
+        "message": "Budget request updated",
+        "claim_id": str(budget.claim_id),
+        "department_id": str(budget.department_id),
+        "requested_by": str(budget.requested_by),
+        "requested_amount": float(budget.requested_amount),
+        "status": budget.status,
+        "remarks": budget.remarks
+    }
     @staticmethod
     def get_budget_requests(
         claim_id,

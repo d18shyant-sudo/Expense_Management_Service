@@ -5,7 +5,6 @@ from decimal import Decimal
 class BudgetRequestCreate(BaseModel):
     claim_id: UUID
     requested_amount: Decimal
-    status: str
     remarks: str
 
 
