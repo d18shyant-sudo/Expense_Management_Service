@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
+from typing import Optional
+
 
 
 class LoginRequest(BaseModel):
@@ -13,3 +15,31 @@ class LoginResponse(BaseModel):
     expires_at: datetime
     authentication_type: str = "Bearer"
     employee_id: UUID
+
+
+
+
+
+from pydantic import BaseModel, EmailStr
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+    
+
+class VerifyOtpRequest(BaseModel):
+    email: EmailStr
+    otp: str
+
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    otp: str
+    new_password: str
+
+
+
+
+
+class MessageResponse(BaseModel):
+    message: str
