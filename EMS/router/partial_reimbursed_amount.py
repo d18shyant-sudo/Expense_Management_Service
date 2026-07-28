@@ -127,7 +127,7 @@ def update_partial_reimbursement(
 @router.get("/partial-reimbursements")
 def get_partial_reimbursement(
     claim_id: str,
-    db: Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin"))
+    db: Session = Depends(get_db),user = Depends(require_role("Finance_Head","Finance_admin","Employee","Manager"))
 ):
     try:
 

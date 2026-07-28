@@ -41,10 +41,11 @@ class AccountService:
                 )
 
         payload = {
-            "username": username,
-            "exp": expires_at,
-            "role":user.role.role_name
-        }
+        "employee_id": str(user.id),
+        "username": username,
+        "role": user.role.role_name,
+        "exp": expires_at
+}
 
         token = jwt.encode(
             payload,
