@@ -98,6 +98,8 @@ export default function RoleLogin() {
             </p>
           </div>
 
+          
+
           {/* Form */}
 
           <div className="p-8">
@@ -215,6 +217,21 @@ export default function RoleLogin() {
                   </>
                 )}
               </button>
+                {/* Login Button */}
+
+<div className="mt-5 text-center">
+  <p className="text-gray-600 text-sm">
+    Don't have an account?
+  </p>
+
+  <button
+    type="button"
+    onClick={() => navigate("/Register")}
+    className="mt-2 w-full border border-green-800 text-green-800 py-3 rounded-xl font-semibold hover:bg-green-50 transition"
+  >
+    Register
+  </button>
+</div>
 
             </form>
 

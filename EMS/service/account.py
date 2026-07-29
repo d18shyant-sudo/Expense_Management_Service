@@ -1,15 +1,24 @@
-from repository.account import AccountRepository
-from utils.otp_store import save_otp, verify_otp
-from utils.emails import send_otp 
-
-import bcrypt
-from jose import jwt
-
 from datetime import datetime, timedelta
 
-import logging
+import bcrypt
+import jwt
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
-logging.basicConfig(level=logging.INFO)
+from repository.account import AccountRepository
+from schema.account import (
+    ForgotPasswordRequest,
+    VerifyOtpRequest,
+    ResetPasswordRequest,
+)
+from utils.emails import send_otp
+from utils.otp_store import save_otp, verify_otp
+
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
 
 
 class AccountService:
@@ -24,14 +33,20 @@ class AccountService:
         return hashed.decode("utf-8")
 
     @staticmethod
-    def verify(password: str, hashed_password: str) -> bool:
+    def verify(
+        password: str,
+        hashed_password: str
+    ) -> bool:
         return bcrypt.checkpw(
             password.encode("utf-8"),
             hashed_password.encode("utf-8")
         )
 
     @staticmethod
-    def create_access_token(username: str, db):
+    def create_access_token(
+        username: str,
+        db: Session
+    ):
 
         account = AccountRepository.get_by_username(
             username,
@@ -39,7 +54,7 @@ class AccountService:
         )
 
         if account is None:
-            raise Exception("Account not found")
+            return None, None
 
         employee = AccountRepository.get_employee_by_email(
             account.email,
@@ -47,7 +62,7 @@ class AccountService:
         )
 
         if employee is None:
-            raise Exception("Employee not found")
+            return None, None
 
         expires_at = datetime.utcnow() + timedelta(hours=1)
 
@@ -66,55 +81,40 @@ class AccountService:
         return token, expires_at
 
     @staticmethod
-    def login(
-        username: str,
-        password: str,
-        db
-    ):
+    def login(username: str, password: str, db: Session):
+      account = AccountRepository.get_by_username(username, db)
+      if account is None:
+        raise ValueError("invalid_credentials")
 
-        account = AccountRepository.get_by_username(
-            username,
-            db
-        )
+      if not AccountService.verify(password, account.password):
+        raise ValueError("invalid_credentials")
 
-        if account is None:
-            return None
+      employee = AccountRepository.get_employee_by_email(account.email, db)
+      if employee is None:
+          raise ValueError("account_not_linked")
 
-        if not AccountService.verify(
-            password,
-            account.password
-        ):
-            return None
+      token, expires_at = AccountService.create_access_token(username, db)
 
-        employee = AccountRepository.get_employee_by_email(
-            account.email,
-            db
-        )
-
-        if employee is None:
-            return None
-
-        token, expires_at = AccountService.create_access_token(
-            username,
-            db
-        )
-
-        return {
-            "token": token,
-            "expires_at": expires_at.isoformat(),
-            "authentication_type": "Bearer",
-            "employee_id": str(employee.id)
-        }
+      return {
+    "token": token,
+    "expires_at": expires_at.isoformat(),
+    "authentication_type": "Bearer",
+    "employee_id": str(employee.id)
+}
+        
 
     @staticmethod
-    def forgot_password(payload, db):
+    def forgot_password(
+        payload: ForgotPasswordRequest,
+        db: Session
+    ):
 
         account = AccountRepository.get_by_email(
             payload.email,
             db
         )
 
-        if not account:
+        if account is None:
             return {
                 "message": "Email not found"
             }
@@ -133,7 +133,9 @@ class AccountService:
         }
 
     @staticmethod
-    def verify_otp(payload):
+    def verify_otp(
+        payload: VerifyOtpRequest
+    ):
 
         if verify_otp(
             payload.email,
@@ -148,14 +150,17 @@ class AccountService:
         }
 
     @staticmethod
-    def reset_password(payload, db):
+    def reset_password(
+        payload: ResetPasswordRequest,
+        db: Session
+    ):
 
         account = AccountRepository.get_by_email(
             payload.email,
             db
         )
 
-        if not account:
+        if account is None:
             return {
                 "message": "Email not found"
             }

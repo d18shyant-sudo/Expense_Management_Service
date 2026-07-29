@@ -22,31 +22,19 @@ router = APIRouter(
 
 
 @router.post("/login")
-def login(
-    payload: LoginRequest,
-    db: Session = Depends(get_db)
-):
-    result = AccountService.login(
-        payload.username,
-        payload.password,
-        db
-    )
-
-    return result
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
+    result = AccountService.login(payload.username, payload.password, db)
 
     if not result:
         return JSONResponse(
             status_code=404,
-            content={
-                "error": "Invalid Credential"
-            }
+            content={"error": "Invalid Credential"}
         )
 
-        return JSONResponse(
+    return JSONResponse(
         status_code=200,
         content=result
     )
-
 
 @router.post("/forgot-password")
 def forgot_password(
