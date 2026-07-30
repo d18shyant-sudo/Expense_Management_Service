@@ -87,6 +87,7 @@ try:
     vinoth.department_id=Finance.id
     ganesh.department_id=Finance.id
     Manoj.department_id=admin.id
+
     # 5. Account
     ram=Account(username="Ram",password=AccountService.encrypt("ram@123"),email="ram@gmail.com")
     mani=Account(username="Mani",password=AccountService.encrypt("mani@123"),email="mani@gmail.com")
@@ -113,8 +114,12 @@ try:
     charlie = Account(username="Charlie",password=AccountService.encrypt("charlie@123"),email="charlie@gmail.com")
     vinoth = Account(username="Vinoth",password=AccountService.encrypt("vinoth@123"),email="vinoth@gmail.com")
     ganesh = Account(username="Ganesh",password=AccountService.encrypt("ganesh@123"),email="ganesh@gmail.com")
+
+    db.add_all([ram,mani,siva,raghul,swetha,mohan,david,hari,priya,lavanya,sathish,gopal,sam,albert,rohini,alice,walter,rajesh,bala,ajay,kumar,rohan,charlie,vinoth,ganesh])
+
     Manoj=Account(username="Manoj",password=AccountService.encrypt("manoj@123"),email="manoj@gmail.com")
     db.add_all([ram,mani,siva,raghul,swetha,mohan,david,hari,priya,lavanya,sathish,gopal,sam,albert,rohini,alice,walter,rajesh,bala,ajay,kumar,rohan,charlie,vinoth,ganesh,Manoj])
+
     db.commit()
 except Exception as e:
     db.rollback()
